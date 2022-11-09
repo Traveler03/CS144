@@ -1,0 +1,74 @@
+// in byte_stream.cc
+#include "byte_stream.hh"
+// Dummy implementation of a flow-controlled in-memory byte stream.
+
+// For Lab 0, please replace with a real implementation that passes the
+// automated checks run by `make check_lab0`.
+
+// You will need to add private members to the class declaration in `byte_stream.hh`
+
+template <typename... Targs>
+void DUMMY_CODE(Targs &&.../* unused */) {}
+
+using namespace std;
+
+ByteStream::ByteStream(const size_t cap) : capacity(cap) { DUMMY_CODE(cap); }
+
+size_t ByteStream::write(const string &data) {
+    DUMMY_CODE(data);
+
+    // 计算可以写入的长度
+    size_t len = remaining_capacity();
+    if (len > data.length()) {
+        len = data.length();
+    }
+
+    // 进行数据的写入
+    this->buf += data.substr(0, len);
+    this->write_len += len;
+    return len;
+}
+
+//! \param[in] len bytes will be copied from the output side of the buffer
+string ByteStream::peek_output(const size_t len) const {
+    DUMMY_CODE(len);
+    size_t LEN = len < this->buffer_size() ? len : this->buffer_size();
+    return this->buf.substr(0,LEN);
+}
+
+//! \param[in] len bytes will be removed from the output side of the buffer
+void ByteStream::pop_output(const size_t len) {
+    DUMMY_CODE(len);
+    this->read_len += len;
+    this->buf = this->buf.substr(len, buffer_size() - len);
+}
+
+//! Read (i.e., copy and then pop) the next "len" bytes of the stream
+//! \param[in] len bytes will be popped and returned
+//! \returns a string
+std::string ByteStream::read(const size_t len) {
+    DUMMY_CODE(len);
+    string str_read;
+    // 获取读到的字符串
+    str_read = this->buf.substr(0, len);
+    
+    this->buf = this->buf.substr(len,buffer_size() - len);
+    this->read_len += str_read.size();
+    return str_read;
+}
+
+void ByteStream::end_input() { this->write_open = 0; }
+
+bool ByteStream::input_ended() const { return this->write_open == 0; }
+
+size_t ByteStream::buffer_size() const { return this->buf.size(); }
+
+bool ByteStream::buffer_empty() const { return this->buf.empty(); }
+
+bool ByteStream::eof() const { return this->write_open == 0 && buffer_empty(); }
+
+size_t ByteStream::bytes_written() const { return this->write_len; }
+
+size_t ByteStream::bytes_read() const { return this->read_len; }
+
+size_t ByteStream::remaining_capacity() const { return this->capacity - this->buf.length(); }
